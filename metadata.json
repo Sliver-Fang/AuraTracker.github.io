@@ -1,0 +1,8 @@
+{
+  "name": "Aura Habit Tracker",
+  "description": "A minimalist, responsive habit tracker with daily goals, Sleep/Wake scheduler, focus timers, quote generators, and task lists.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

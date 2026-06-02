@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Habit Tracker</title>
+  <!-- Google Fonts for refreshing modern aesthetics -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Lucide icons CDN for beautiful minimalist indicators -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind CSS v3 CDN for instant portable configuration on Android/Web -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  
+  <script>
+    // Configure Tailwind inline compiler to recognize our custom color variable structures and dark mode standard
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            accent: {
+              primary: 'var(--accent-primary)',
+              hover: 'var(--accent-hover)',
+              light: 'var(--accent-light)',
+              dark: 'var(--accent-dark)',
+              glow: 'var(--accent-glow)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-[#0f172a] dark:text-slate-100 min-h-screen transition-colors duration-300 pb-16 font-sans">
+  
+  <!-- Aura Application Header -->
+  <header class="border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/40 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      
+      <!-- Logo and Live Time -->
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-accent-primary text-white flex items-center justify-center shadow-lg shadow-accent-light/40 dark:shadow-none transition-all duration-300 transform hover:scale-105" id="logo-badge">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold font-display tracking-tight text-slate-900 dark:text-white">AURA</h1>
+            <span class="text-xs bg-accent-light/50 text-accent-dark dark:bg-accent-dark/20 dark:text-accent-light px-2 py-0.5 rounded-full font-medium tracking-wide">HABITS</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-mono tracking-tight" id="live-time-indicator">Mon, June 1, 6:16 PM</p>
+        </div>
+      </div>
+      
+      <!-- Utility Bar: Dark toggle, Palette Swapper -->
+      <div class="flex flex-wrap items-center gap-3 sm:gap-4 select-none">
+        <!-- Palette Choice Row -->
+        <div class="bg-slate-100/80 dark:bg-slate-800/60 p-1.5 rounded-xl flex items-center gap-1.5 border border-slate-200/50 dark:border-slate-700/50">
+          <button onclick="setPalette('mint')" class="w-6 h-6 rounded-full bg-emerald-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Emerald Mint" id="palette-mint"></button>
+          <button onclick="setPalette('azure')" class="w-6 h-6 rounded-full bg-sky-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Ocean Azure" id="palette-azure"></button>
+          <button onclick="setPalette('lavender')" class="w-6 h-6 rounded-full bg-indigo-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Sunset Lavender" id="palette-lavender"></button>
+          <button onclick="setPalette('sunset')" class="w-6 h-6 rounded-full bg-amber-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Warm Amber" id="palette-sunset"></button>
+          <button onclick="setPalette('sakura')" class="w-6 h-6 rounded-full bg-rose-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Sakura Blossom" id="palette-sakura"></button>
+        </div>
+        
+        <!-- Toggle Dark Mode -->
+        <button id="theme-toggle" onclick="toggleDarkMode()" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-amber-400 cursor-pointer shadow-sm active:scale-95 transition-all">
+          <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
+          <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Content Grid -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- LEFT SECTION : Overview, Sleep Timer, Focus, and Charts (Takes 4 columns on large) -->
+      <div class="lg:col-span-4 flex flex-col gap-6">
+        
+        <!-- Quote of the Day Section -->
+        <section id="quote-card" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-accent-light/10 dark:bg-accent-dark/5 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <span class="text-xs font-semibold text-accent-primary dark:text-accent-light tracking-widest font-display flex items-center gap-1.5 uppercase">
+              <i data-lucide="quote" class="w-3.5 h-3.5"></i> Daily Zen
+            </span>
+            <button onclick="loadNewQuote(true)" class="text-slate-400 hover:text-accent-primary dark:hover:text-accent-light p-1 rounded-lg transition-colors cursor-pointer" title="Refresh Zen Quote">
+              <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <blockquote class="text-slate-700 dark:text-slate-200 text-sm italic font-medium leading-relaxed mb-3" id="quote-text">
+            "Your habits shape your identity. Build systems, not just goals."
+          </blockquote>
+          <cite class="text-xs text-slate-400 dark:text-slate-500 font-mono not-italic block text-right" id="quote-author">— James Clear</cite>
+        </section>
+
+        <!-- Dynamic Sleep/Wake Tracker -->
+        <section id="sleep-wake-card" class="bg-[#1e1b4b] text-white border border-slate-850 dark:border-slate-800/80 rounded-3xl p-6 shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-300 relative overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-br from-[#1e1b4b] to-[#312e81] pointer-events-none opacity-80"></div>
+          
+          <div class="flex items-center justify-between mb-4 relative z-10">
+            <span class="text-xs font-semibold text-accent-light tracking-widest font-display flex items-center gap-1.5 uppercase">
+              <i data-lucide="clock" class="w-3.5 h-3.5"></i> Circle of Sleep
+            </span>
+            <span id="sleep-status-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase bg-emerald-100/20 text-emerald-300">
+              Awake
+            </span>
+          </div>
+
+          <!-- Main Interactive Sleep Display -->
+          <div class="text-center py-4 flex flex-col items-center justify-center relative z-10">
+            <div id="sleep-visual-container" class="w-20 h-20 rounded-full flex items-center justify-center border-4 border-dashed border-accent-light bg-accent-light/10 mb-4 animate-[spin_60s_linear_infinite]">
+              <i id="sleep-status-icon" data-lucide="sun" class="w-10 h-10 text-accent-light transition-transform duration-500"></i>
+            </div>
+            
+            <p id="sleep-timer-title" class="text-xs text-indigo-200 font-mono uppercase tracking-widest mb-1">Time Awake Today</p>
+            <h3 id="sleep-duration-clock" class="text-2xl font-bold font-mono tracking-tight text-white">00h 00m 00s</h3>
+          </div>
+
+          <!-- Quick Action Sleep Trigger -->
+          <button id="sleep-toggle-btn" onclick="toggleSleepState()" class="w-full bg-white hover:bg-indigo-50 text-indigo-900 py-3 px-4 rounded-2xl flex items-center justify-center gap-2 font-bold shadow-md hover:translate-y-[-1px] active:translate-y-[1px] transition-all cursor-pointer relative z-10">
+            <i data-lucide="moon" class="w-4 h-4"></i>
+            <span id="sleep-btn-text">Turn Off / Go to Sleep</span>
+          </button>
+
+          <!-- History/Stats Summary -->
+          <div class="mt-4 pt-4 border-t border-indigo-950/40 relative z-10">
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="text-indigo-250">Sleep/Wake Log</span>
+              <button onclick="clearSleepHistory()" class="text-indigo-300 hover:text-rose-400 transition-colors cursor-pointer text-[10px] font-mono">Clear Log</button>
+            </div>
+            <ul id="sleep-history-list" class="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+              <!-- Logs populated dynamically -->
+              <li class="text-xs text-indigo-300 italic text-center py-2">No logging history recorded yet.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Focus Session / Pomodoro Timer -->
+        <section id="focus-card" class="bg-emerald-500 text-white border border-emerald-600/20 rounded-3xl p-6 shadow-lg shadow-emerald-700/20 transition-all duration-300 relative overflow-hidden">
+          
+          <div class="flex items-center justify-between mb-4 relative z-10">
+            <span class="text-xs font-semibold text-white tracking-widest font-display flex items-center gap-1.5 uppercase opacity-90">
+              <i data-lucide="hourglass" class="w-3.5 h-3.5"></i> Focus Room
+            </span>
+            <div class="flex gap-1 bg-white/10 p-0.5 rounded-lg border border-white/10">
+              <button onclick="setFocusPreset(25)" class="text-[10px] px-2 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20" id="preset-25">25m</button>
+              <button onclick="setFocusPreset(5)" class="text-[10px] px-2 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20" id="preset-5">5m</button>
+              <button onclick="setFocusPreset(15)" class="text-[10px] px-2 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20" id="preset-15">15m</button>
+            </div>
+          </div>
+
+          <!-- Circular Focus Timer (SVG Visualizer) -->
+          <div class="relative flex items-center justify-center p-4 relative z-10">
+            <svg class="w-32 h-32 transform -rotate-90">
+              <circle cx="64" cy="64" r="54" class="stroke-white/20 fill-transparent" stroke-width="6" />
+              <circle cx="64" cy="64" r="54" id="focus-progress-circle" class="stroke-white fill-transparent transition-all duration-1000" stroke-width="6" stroke-dasharray="339.29" stroke-dashoffset="0" stroke-linecap="round" />
+            </svg>
+            <div class="absolute flex flex-col items-center justify-center">
+              <span id="focus-timer-text" class="text-2xl font-bold font-mono tracking-tight text-white">25:00</span>
+              <span id="focus-phase-label" class="text-[9px] font-mono uppercase tracking-widest text-emerald-100">Work</span>
+            </div>
+          </div>
+
+          <!-- Focus Action Triggers -->
+          <div class="flex gap-2.5 mt-4 relative z-10">
+            <button id="focus-play-btn" onclick="toggleFocusTimer()" class="flex-1 bg-white text-emerald-600 hover:bg-emerald-50 py-3 rounded-2xl flex items-center justify-center gap-1.5 text-xs font-bold shadow-md cursor-pointer transition-all">
+              <i data-lucide="play" id="focus-play-icon" class="w-3.5 h-3.5"></i>
+              <span id="focus-play-text">Start Focus</span>
+            </button>
+            <button id="focus-reset-btn" onclick="resetFocusTimer()" class="px-3 bg-white/10 border border-white/20 hover:bg-white/20 rounded-2xl flex items-center justify-center text-xs cursor-pointer transition-all" title="Reset Session">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-white"></i>
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between mt-3 text-[10px] text-emerald-100 font-mono relative z-10">
+            <span>Sound alerts enabled</span>
+            <button onclick="testBeepSound()" class="hover:underline transition-all font-semibold">Test alarm chime</button>
+          </div>
+        </section>
+
+      </div>
+      
+      <!-- RIGHT SECTION : Habit Task list, Done column, Things not to do, Goals and Stats (Takes 8 columns on large) -->
+      <div class="lg:col-span-8 flex flex-col gap-6">
+        
+        <!-- Two-Column Habit & Vice Panels -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Column A: Focus Tasks for Today -->
+          <section id="tasks-today-card" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm transition-all duration-300">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+              <div class="flex items-center gap-2">
+                <div class="h-7 w-7 rounded-lg bg-[#e0e7ff] text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 flex items-center justify-center">
+                  <i data-lucide="target" class="w-4 h-4"></i>
+                </div>
+                <h3 class="font-bold text-sm tracking-wide dark:text-white uppercase font-display">Tasks & Habits</h3>
+              </div>
+              <span id="task-completion-stats" class="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                0/0 Completed
+              </span>
+            </div>
+            
+            <!-- Add New Task Form -->
+            <form onsubmit="handleAddTask(event)" class="mb-4 flex gap-2">
+              <input type="text" id="task-input" placeholder="Assign task or daily habit..." class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-accent-primary focus:border-accent-primary outline-none transition-all dark:text-white" required>
+              <select id="task-priority" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs px-2 outline-none cursor-pointer focus:ring-1 focus:ring-accent-primary font-medium" title="Priority Level">
+                <option value="1">⚠️ Low</option>
+                <option value="2" selected>⚡ Med</option>
+                <option value="3">🔥 High</option>
+              </select>
+              <button type="submit" class="bg-accent-primary hover:bg-accent-hover text-white px-3.5 rounded-xl flex items-center justify-center hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-accent-primary/10 cursor-pointer">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+              </button>
+            </form>
+            
+            <!-- List and Accomplished tabs -->
+            <div class="space-y-4">
+              <div>
+                <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Underway</span>
+                <ul id="active-tasks-list" class="space-y-2 min-h-24 max-h-80 overflow-y-auto pr-1">
+                  <!-- Active items loaded dynamically -->
+                  <li class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-8">Assign an empty field to get started!</li>
+                </ul>
+              </div>
+              
+              <div class="pt-3 border-t border-dashed border-slate-200/80 dark:border-slate-800/80">
+                <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Accomplished</span>
+                <ul id="done-tasks-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  <!-- Done items loaded dynamically -->
+                  <li class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-4">Completed items will group here.</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- Column B: Things Not To Do TODAY (Avoidance habits) -->
+          <section id="vice-card" class="bg-rose-50 dark:bg-[#1a1215] border border-rose-100 dark:border-rose-950/40 rounded-3xl p-6 shadow-sm transition-all duration-300">
+            <div class="flex items-center justify-between mb-4 border-b border-rose-100 dark:border-rose-950/40 pb-3">
+              <div class="flex items-center gap-2">
+                <div class="h-7 w-7 rounded-lg bg-rose-100/60 dark:bg-rose-955/20 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                  <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                </div>
+                <h3 class="font-bold text-sm tracking-wide text-rose-900 dark:text-white uppercase font-display">Things Not To Do</h3>
+              </div>
+              <span id="vice-completion-stats" class="text-xs font-mono px-2 py-0.5 rounded-full bg-white dark:bg-slate-850 text-slate-500 dark:text-slate-400 shadow-sm border border-slate-100 dark:border-slate-800">
+                0/0 Avoided
+              </span>
+            </div>
+
+            <!-- Add Avoidance Form -->
+            <form onsubmit="handleAddVice(event)" class="mb-4 flex gap-2">
+              <input type="text" id="vice-input" placeholder="Avoid category, e.g. Snoozing, Sugar..." class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-accent-primary focus:border-accent-primary outline-none transition-all dark:text-white" required>
+              <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white px-3.5 rounded-xl flex items-center justify-center hover:scale-[1.02] active:scale-95 transition-all shadow-md shadow-rose-500/10 cursor-pointer">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+              </button>
+            </form>
+
+            <!-- Vice avoidance items lists -->
+            <div class="space-y-4">
+              <div>
+                <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Actively Avoiding Today</span>
+                <ul id="active-vices-list" class="space-y-2 min-h-24 max-h-80 overflow-y-auto pr-1">
+                  <!-- Active vices loaded dynamically -->
+                  <li class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-8">Keep this panel populated with avoidances.</li>
+                </ul>
+              </div>
+
+              <div class="pt-3 border-t border-dashed border-slate-200/80 dark:border-slate-800/80">
+                <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Tripped List (Broken Avoidances)</span>
+                <p class="text-[9px] text-slate-400 dark:text-slate-500 mb-2 leading-tight">These habits were broken today. Start fresh tomorrow!</p>
+                <ul id="tripped-vices-list" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  <!-- Tripped vices loaded dynamically -->
+                  <li class="text-xs text-slate-400 dark:text-slate-500 italic text-center py-4">No avoidances tripped. Amazing control!</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+          
+        </div>
+
+        <!-- Long-Term / High-level Goals Panel -->
+        <section id="goals-card" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm transition-all duration-300">
+          <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-7 w-7 rounded-lg bg-orange-100 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400 flex items-center justify-center">
+                <i data-lucide="trophy" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-sm tracking-wide dark:text-white uppercase font-display">Assigned Big Goals & Streaks</h3>
+            </div>
+            <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">Build focus over time</span>
+          </div>
+
+          <!-- Add Long Term Goal Form -->
+          <form onsubmit="handleNewGoal(event)" class="mb-4 flex flex-col sm:flex-row gap-2">
+            <input type="text" id="goal-input" placeholder="E.g., Read 30 books, Sleep 8 hrs daily, Abs core work..." class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-accent-primary outline-none text-slate-850 dark:text-white" required>
+            <div class="flex gap-2">
+              <input type="number" id="goal-target" min="1" max="1000" placeholder="Target" class="w-20 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs px-2.5 outline-none text-center" title="Target times / milestones" required>
+              <button type="submit" class="bg-accent-primary hover:bg-accent-hover text-white py-2 px-4 rounded-xl text-xs font-semibold hover:scale-[1.02] active:scale-95 transition-all outline-none cursor-pointer">
+                Create Goal
+              </button>
+            </div>
+          </form>
+
+          <!-- Goals List Panel -->
+          <div id="goals-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-80 overflow-y-auto pr-1">
+            <!-- Long Term goals dynamically added here -->
+            <div class="col-span-2 text-xs text-slate-400 dark:text-slate-500 italic text-center py-6">
+              Create your first major long-term milestone above to track streaks and targets.
+            </div>
+          </div>
+        </section>
+
+        <!-- Comparison Chart (Fully HTML/SVG, Local & Offline Friendly) -->
+        <section id="analytics-chart-card" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm transition-all duration-300">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3 mb-4 gap-2">
+            <div class="flex items-center gap-2">
+              <div class="h-7 w-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 dark:text-emerald-400 flex items-center justify-center">
+                <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+              </div>
+              <h3 class="font-bold text-sm tracking-wide dark:text-white uppercase font-display">Daily Comparison Progress</h3>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <!-- Inline historical operations -->
+              <button onclick="simulateProgressData()" class="text-xs bg-slate-55 shadow-sm bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-200/60 transition-all font-medium text-slate-500 dark:text-slate-350 select-none text-[10px] uppercase tracking-wide cursor-pointer flex items-center gap-1">
+                <i data-lucide="flask-conical" class="w-3 h-3"></i> Prepopulate Mock History
+              </button>
+              <button onclick="clearAnalyticsData()" class="text-[10px] text-rose-500 border border-rose-200 dark:border-rose-950 px-2.5 py-1 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all cursor-pointer font-bold select-none uppercase tracking-wide">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+            The bar chart below maps your daily tracker performance (successful completed tasks and successfully avoided vices count) across the last 7 calendar days. Build streaks to increase the absolute height of the columns.
+          </p>
+
+          <!-- SVG Visual Chart Container (Ensures responsive viewport) -->
+          <div class="w-full relative py-2" id="svg-chart-container">
+            <svg id="progress-svg-chart" viewBox="0 0 600 300" class="w-full h-auto text-slate-400 dark:text-slate-600 block">
+              <!-- Dynamic SVG drawn on State Change -->
+            </svg>
+          </div>
+          
+          <div class="flex items-center justify-end gap-5 mt-4 text-[10px] font-mono text-slate-400 dark:text-slate-500 select-none">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-accent-primary"></span>
+              <span>Daily Tasks Completed</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-sm bg-rose-500"></span>
+              <span>Vices/Broken Avoidance</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+      
+    </div>
+  </main>
+
+  <footer class="mt-12 text-center text-xs text-slate-400 dark:text-slate-600 max-w-7xl mx-auto border-t border-slate-100 dark:border-slate-800/80 pt-6 px-4">
+    <p class="font-display font-medium tracking-wider mb-1">AURA WELLNESS HABIT SYSTEM</p>
+    <p class="font-mono text-[10px]">Your progress is saved locally in standard Indexed/Storage clusters. Full offline capability on Android device enabled.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

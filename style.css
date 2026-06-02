@@ -1,0 +1,152 @@
+/* Aura Minimalist Theme Palette Variables & Custom Interactions Stylesheet */
+
+/* Default Root Settings (Mint Theme is active by default) */
+:root {
+  --accent-primary: #10b981;
+  --accent-hover: #059669;
+  --accent-light: #d1fae5;
+  --accent-dark: #065f46;
+  --accent-glow: rgba(16, 185, 129, 0.15);
+  
+  --font-sans: 'Outfit', sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Palette Overrides based on selected HTML Data Attribute */
+[data-palette="mint"] {
+  --accent-primary: #10b981;
+  --accent-hover: #059669;
+  --accent-light: #d1fae5;
+  --accent-dark: #065f46;
+  --accent-glow: rgba(16, 185, 129, 0.15);
+}
+
+[data-palette="azure"] {
+  --accent-primary: #0ea5e9;
+  --accent-hover: #0284c7;
+  --accent-light: #e0f2fe;
+  --accent-dark: #075985;
+  --accent-glow: rgba(14, 165, 233, 0.15);
+}
+
+[data-palette="lavender"] {
+  --accent-primary: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-light: #e0e7ff;
+  --accent-dark: #3730a3;
+  --accent-glow: rgba(99, 102, 241, 0.15);
+}
+
+[data-palette="sunset"] {
+  --accent-primary: #f59e0b;
+  --accent-hover: #d97706;
+  --accent-light: #fef3c7;
+  --accent-dark: #824f0c;
+  --accent-glow: rgba(245, 158, 11, 0.15);
+}
+
+[data-palette="sakura"] {
+  --accent-primary: #f43f5e;
+  --accent-hover: #e11d48;
+  --accent-light: #ffe4e6;
+  --accent-dark: #9f1239;
+  --accent-glow: rgba(244, 63, 94, 0.15);
+}
+
+/* Base custom resets & styles */
+html {
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+}
+
+/* Web Audio alerts sound settings: micro interaction triggers */
+.alert-pulse {
+  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+/* Custom dynamic lists styles */
+.task-item {
+  animation: enter-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar styles optimized for WebKit devices (Chrome Android / Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  transition: background 0.2s;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Custom CSS to handle SVG chart layout and micro glows */
+.chart-bar-hover:hover {
+  filter: drop-shadow(0 4px 6px var(--accent-glow));
+}
+
+/* Quick checklist transitions */
+.strike-through {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Glow layout for selected palette circle */
+.active-palette-ring {
+  border-color: #ffffff !important;
+  box-shadow: 0 0 0 2px var(--accent-primary), 0 4px 6px -1px var(--accent-glow);
+  transform: scale(1.18);
+}
+
+.dark .active-palette-ring {
+  border-color: #1e293b !important;
+  box-shadow: 0 0 0 2px var(--accent-primary), 0 4px 6px -1px var(--accent-glow);
+  transform: scale(1.18);
+}
+
+/* Glassmorphism background blur fixes for dark environments */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
