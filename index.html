@@ -69,6 +69,14 @@
       --accent-glow: rgba(244, 63, 94, 0.15);
     }
 
+    [data-palette="aurora"] {
+      --accent-primary: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --accent-light: #f5f3ff;
+      --accent-dark: #5b21b6;
+      --accent-glow: rgba(139, 92, 246, 0.15);
+    }
+
     /* Base custom resets & styles */
     html {
       font-family: var(--font-sans);
@@ -165,6 +173,40 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
+
+    /* Elegant, minimalist background changing gradient animation for Aurora mode */
+    @keyframes aurora-bg-animation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .aurora-animate-bg {
+      background: linear-gradient(-45deg, #f0fdf4, #ecfeff, #e0e7ff, #fdf2f8) !important;
+      background-size: 300% 300% !important;
+      animation: aurora-bg-animation 20s ease infinite !important;
+      transition: background-color 0.5s ease;
+    }
+
+    .dark .aurora-animate-bg {
+      background: linear-gradient(-45deg, #022c22, #083344, #1e1b4b, #31112c) !important;
+      background-size: 300% 300% !important;
+      animation: aurora-bg-animation 20s ease infinite !important;
+      transition: background-color 0.5s ease;
+    }
+
+    /* Mesmerizing fullscreen Focus Timer changing linear gradient background */
+    @keyframes focus-grad-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .focus-fullscreen-bg {
+      background: linear-gradient(135deg, #022c22, #064e3b, #111827, #1e1b4b);
+      background-size: 300% 300%;
+      animation: focus-grad-shift 12s ease infinite;
+    }
   </style>
   
   <script>
@@ -221,6 +263,7 @@
           <button onclick="setPalette('lavender')" class="w-6 h-6 rounded-full bg-indigo-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Sunset Lavender" id="palette-lavender"></button>
           <button onclick="setPalette('sunset')" class="w-6 h-6 rounded-full bg-amber-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Warm Amber" id="palette-sunset"></button>
           <button onclick="setPalette('sakura')" class="w-6 h-6 rounded-full bg-rose-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Sakura Blossom" id="palette-sakura"></button>
+          <button onclick="setPalette('aurora')" class="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-400 via-indigo-500 to-rose-500 hover:scale-110 active:scale-95 transition-transform cursor-pointer border-2 border-transparent" title="Aurora Changing Gradient" id="palette-aurora"></button>
         </div>
         
         <!-- Toggle Aura Link Sync -->
@@ -309,14 +352,36 @@
         <section id="focus-card" class="bg-emerald-500 text-white border border-emerald-600/20 rounded-3xl p-6 shadow-lg shadow-emerald-700/20 transition-all duration-300 relative overflow-hidden">
           
           <div class="flex items-center justify-between mb-4 relative z-10">
-            <span class="text-xs font-semibold text-white tracking-widest font-display flex items-center gap-1.5 uppercase opacity-90">
-              <i data-lucide="hourglass" class="w-3.5 h-3.5"></i> Focus Room
-            </span>
-            <div class="flex gap-1 bg-white/10 p-0.5 rounded-lg border border-white/10">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-semibold text-white tracking-widest font-display flex items-center gap-1.5 uppercase opacity-90">
+                <i data-lucide="hourglass" class="w-3.5 h-3.5"></i> Focus Room
+              </span>
+              <button onclick="enterFocusFullscreen()" class="p-1.5 hover:bg-white/20 rounded-xl transition-all text-white/85 hover:text-white cursor-pointer flex items-center justify-center" title="Go Fullscreen (Linear Gradient Aura Animation)">
+                <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <div class="flex gap-1 bg-white/10 p-0.5 rounded-lg border border-white/10 select-none">
               <button onclick="setFocusPreset(25)" class="text-[10px] px-2 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20" id="preset-25">25m</button>
               <button onclick="setFocusPreset(5)" class="text-[10px] px-2 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20" id="preset-5">5m</button>
               <button onclick="setFocusPreset(15)" class="text-[10px] px-2 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20" id="preset-15">15m</button>
+              <button onclick="toggleCustomTimerInput()" class="text-[10px] px-1.5 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20 flex items-center justify-center" id="preset-customBtn" title="Set Custom Countdown">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+              </button>
             </div>
+          </div>
+
+          <!-- Inline Custom Timer Picker Form -->
+          <div id="custom-timer-picker" class="hidden mt-2 mb-4 p-2.5 bg-white/10 rounded-2xl border border-white/10 flex items-center justify-between gap-2 relative z-10">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-100 font-bold">Custom Countdown:</span>
+            <div class="flex items-center gap-1">
+              <input type="number" id="custom-focus-min" min="1" max="180" value="25" class="w-12 bg-white/25 border border-white/10 rounded-lg px-2 py-1 text-xs text-center text-white font-semibold font-mono outline-none focus:ring-1 focus:ring-white/40" title="Minutes">
+              <span class="text-[10px] font-mono text-white/80 font-bold">m</span>
+              <input type="number" id="custom-focus-sec" min="0" max="59" value="0" class="w-10 bg-white/25 border border-white/10 rounded-lg px-2 py-1 text-xs text-center text-white font-semibold font-mono outline-none focus:ring-1 focus:ring-white/40" title="Seconds">
+              <span class="text-[10px] font-mono text-white/80 font-bold">s</span>
+            </div>
+            <button onclick="applyCustomFocusTimer()" class="bg-white hover:bg-emerald-50 text-emerald-600 px-3 py-1 text-[10px] font-bold rounded-lg cursor-pointer transition-all active:scale-95 shadow-sm">
+              Apply
+            </button>
           </div>
 
           <!-- Circular Focus Timer (SVG Visualizer) -->
@@ -534,6 +599,64 @@
     <p class="font-mono text-[10px]">Your progress is saved locally in standard Indexed/Storage clusters. Full offline capability on Android device enabled.</p>
   </footer>
 
+  <!-- Mesmerizing Fullscreen Focus Timer Overlay -->
+  <div id="focus-fullscreen-overlay" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center text-white focus-fullscreen-bg transition-opacity duration-500">
+    <!-- Close / Compress Button at corner -->
+    <button onclick="exitFocusFullscreen()" class="absolute top-6 right-6 h-12 w-12 bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center rounded-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer" title="Exit Fullscreen">
+      <i data-lucide="minimize" class="w-6 h-6 text-white"></i>
+    </button>
+
+    <!-- Content Card/Layout -->
+    <div class="flex flex-col items-center max-w-lg w-full text-center px-6 selection:bg-emerald-500/30 select-none">
+      
+      <!-- Phase / Mantra Header -->
+      <span class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300 mb-6 font-display flex items-center gap-2" id="fullscreen-focus-phase-container">
+        <i data-lucide="sparkles" class="w-4 h-4 animate-pulse text-emerald-300"></i>
+        <span id="fullscreen-focus-phase-label">Work Session</span>
+      </span>
+
+      <!-- Extra-large Visual circular timer -->
+      <div class="relative flex items-center justify-center mb-10">
+        <!-- Pulse Glow Ring underneath -->
+        <div class="absolute inset-x-0 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-emerald-500/10 blur-3xl animate-[pulse_4s_ease-in-out_infinite] scale-125"></div>
+        
+        <svg class="w-64 h-64 sm:w-80 sm:h-80 transform -rotate-90 relative z-10">
+          <circle cx="128" cy="128" r="114" class="stroke-white/10 fill-transparent sm:hidden" stroke-width="8" />
+          <circle cx="128" cy="128" r="114" id="fullscreen-focus-progress-circle-sm" class="stroke-emerald-400 fill-transparent transition-all duration-1000 sm:hidden" stroke-width="8" stroke-dasharray="716.28" stroke-dashoffset="0" stroke-linecap="round" />
+          
+          <circle cx="160" cy="160" r="144" class="stroke-white/15 fill-transparent hidden sm:block" stroke-width="10" />
+          <circle cx="160" cy="160" r="144" id="fullscreen-focus-progress-circle-lg" class="stroke-emerald-400 fill-transparent transition-all duration-1000 hidden sm:block" stroke-width="10" stroke-dasharray="904.78" stroke-dashoffset="0" stroke-linecap="round" />
+        </svg>
+        
+        <!-- Large Centered Chronometer numerals -->
+        <div class="absolute flex flex-col items-center justify-center z-20">
+          <h2 id="fullscreen-focus-timer-text" class="text-6xl sm:text-8xl font-bold font-mono tracking-tighter text-white">25:00</h2>
+          <p class="text-[10px] sm:text-xs font-mono uppercase tracking-[0.2em] text-white/50 mt-2" id="fullscreen-phase-subtext">Stay Present</p>
+        </div>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="flex items-center gap-4 w-full justify-center">
+        <!-- Play / Pause trigger -->
+        <button id="fullscreen-focus-play-btn" onclick="toggleFocusTimer()" class="h-14 px-8 bg-emerald-500 hover:bg-emerald-400 text-white hover:shadow-lg hover:shadow-emerald-500/20 rounded-2xl flex items-center justify-center gap-2.5 font-bold transition-all active:scale-95 cursor-pointer">
+          <i data-lucide="play" id="fullscreen-focus-play-icon" class="w-5 h-5"></i>
+          <span id="fullscreen-focus-play-text" class="text-sm">Start Session</span>
+        </button>
+
+        <!-- Reset Button -->
+        <button id="fullscreen-focus-reset-btn" onclick="resetFocusTimer()" class="h-14 w-14 bg-white/10 border border-white/10 hover:bg-white/25 rounded-2xl flex items-center justify-center transition-all active:scale-95 cursor-pointer hover:scale-105" title="Reset Session">
+          <i data-lucide="rotate-ccw" class="w-5 h-5 text-white"></i>
+        </button>
+      </div>
+
+      <!-- Quick Tips / Zen Quotes -->
+      <p class="text-xs text-white/40 font-mono mt-12 px-4 italic leading-relaxed" id="fullscreen-quote-indicator">
+        "Focus is a high-contrast state where mind and task become a single unified flow."
+      </p>
+
+    </div>
+  </div>
+
   <!-- Aura Link — Cross-Device Sync Modal -->
   <div id="sync-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 dark:bg-black/75 backdrop-blur-md hidden transition-all duration-300">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
@@ -719,15 +842,21 @@
         }
       }
 
-      // Periodical background sync check: sync every 8 seconds if tab has focus
+      // Periodical background sync check: highly-reactive 3s on active, 10s on background
       setInterval(() => {
-        if (document.hidden === false) {
-          const syncKey = localStorage.getItem("aura-sync-key");
-          if (syncKey) {
-            syncNow(true); // Pull updates automatically if cloud is newer
-          }
+        const syncKey = localStorage.getItem("aura-sync-key");
+        if (!syncKey) return;
+        
+        const isHidden = document.hidden;
+        const now = Date.now();
+        const lastCheck = window._lastSyncCheckTime || 0;
+        const interval = isHidden ? 10000 : 3000;
+
+        if (now - lastCheck >= interval) {
+          window._lastSyncCheckTime = now;
+          syncNow(true); // Pull updates automatically if cloud is newer
         }
-      }, 8000);
+      }, 1000);
 
       // Upgrade lucide icons
       updateIcons();
@@ -795,6 +924,55 @@
     let syncDebounceTimer = null;
     let isSyncingActive = false; // Guard to prevent duplicate overlapping fetches
 
+    // Prefix-aware Sync Key parser
+    function parseSyncKey(fullKey) {
+      if (!fullKey) return null;
+      const keyStr = String(fullKey).trim();
+      if (keyStr.startsWith("jb-")) {
+        return { type: "jsonblob", key: keyStr.substring(3) };
+      } else if (keyStr.startsWith("np-")) {
+        return { type: "npoint", key: keyStr.substring(3) };
+      } else {
+        // Backward-compatible fallback to jsonblob format
+        return { type: "jsonblob", key: keyStr };
+      }
+    }
+
+    // Dynamic, serverless cloud relay data retrieval
+    async function fetchCloudData(parsed) {
+      if (!parsed) throw new Error("Null key context");
+      
+      let url;
+      if (parsed.type === "jsonblob") {
+        url = `https://jsonblob.com/api/jsonBlob/${parsed.key}`;
+      } else {
+        url = `https://api.npoint.io/${parsed.key}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.status === 404) {
+        throw new Error("Blob expired");
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP status code error ${response.status}`);
+      }
+
+      const resJson = await response.json();
+      if (parsed.type === "jsonblob") {
+        return resJson;
+      } else {
+        return resJson.contents || resJson;
+      }
+    }
+
     function triggerAutoSync() {
       const syncKey = localStorage.getItem("aura-sync-key");
       if (!syncKey) return;
@@ -821,31 +999,12 @@
       if (syncLoader) syncLoader.classList.add("animate-spin");
       if (syncIconBtn) syncIconBtn.classList.add("animate-spin");
 
+      const parsed = parseSyncKey(syncKey);
+
       try {
-        const response = await fetch(`https://jsonblob.com/api/jsonBlob/${syncKey}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (response.status === 404) {
-          // Cloud blob has expired or been deleted
-          updateSyncModalUI(true, "Aura Link expired on server (Please unlink and recreate)", true);
-          const activeKeyLabel = document.getElementById("active-sync-key-label");
-          if (activeKeyLabel) activeKeyLabel.innerHTML = `<span class="text-rose-500 font-bold">KEY EXPIRED</span>`;
-          isSyncingActive = false;
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`Server status ${response.status}`);
-        }
-
-        const cloudData = await response.json();
+        const cloudData = await fetchCloudData(parsed);
         if (!cloudData || typeof cloudData !== 'object') {
-          throw new Error("Malformatted data object");
+          throw new Error("Malformatted data object from cloud");
         }
 
         const cloudUpdated = cloudData.lastUpdated ? parseInt(cloudData.lastUpdated) : 0;
@@ -876,8 +1035,13 @@
         }
       } catch (err) {
         console.warn("Aura Link background sync warning:", err.message || err);
-        // Do not crash, do not pop a giant toast for passive poll failures. Gracefully update status badge.
-        updateSyncModalUI(true, "Connection suspended (Offline / CORS active)", true);
+        if (err.message === "Blob expired") {
+          updateSyncModalUI(true, "Aura Link expired on server (Please recreate link)", true);
+          const activeKeyLabel = document.getElementById("active-sync-key-label");
+          if (activeKeyLabel) activeKeyLabel.innerHTML = `<span class="text-rose-500 font-bold">KEY EXPIRED</span>`;
+        } else {
+          updateSyncModalUI(true, "Connection suspended (Offline / CORS active)", true);
+        }
       } finally {
         isSyncingActive = false;
         if (syncLoader) syncLoader.classList.remove("animate-spin");
@@ -885,14 +1049,27 @@
       }
     }
 
-    async function pushStateToCloud(key) {
+    async function pushStateToCloud(fullKey) {
+      const parsed = parseSyncKey(fullKey);
+      if (!parsed) return;
+
       try {
-        const response = await fetch(`https://jsonblob.com/api/jsonBlob/${key}`, {
+        let url;
+        let body;
+        if (parsed.type === "jsonblob") {
+          url = `https://jsonblob.com/api/jsonBlob/${parsed.key}`;
+          body = JSON.stringify(state);
+        } else {
+          url = `https://api.npoint.io/${parsed.key}`;
+          body = JSON.stringify({ contents: state });
+        }
+
+        const response = await fetch(url, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(state)
+          body: body
         });
         if (!response.ok) {
           throw new Error(`Server returned status: ${response.status}`);
@@ -907,24 +1084,14 @@
       const cleanKey = key.trim();
       showNotification("Connecting to cloud Aura channel...", "sync");
 
+      const parsed = parseSyncKey(cleanKey);
+      if (!parsed) {
+        showNotification("Failed to pair: Invalid sync key.", "error");
+        return;
+      }
+
       try {
-        const response = await fetch(`https://jsonblob.com/api/jsonBlob/${cleanKey}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-
-        if (response.status === 404) {
-          throw new Error("This sync key does not exist or has expired.");
-        }
-
-        if (!response.ok) {
-          throw new Error(`Server responded with code ${response.status}`);
-        }
-
-        const cloudData = await response.json();
+        const cloudData = await fetchCloudData(parsed);
         if (!cloudData || typeof cloudData !== 'object') {
           throw new Error("Data model is invalid on relay");
         }
@@ -943,6 +1110,8 @@
 
     async function createSyncLink() {
       showNotification("Creating Aura Link cloud channel...", "sync");
+      
+      // Attempt 1: Try creating on primary JSONBlob server
       try {
         state.lastUpdated = Date.now();
         const response = await fetch('https://jsonblob.com/api/jsonBlob', {
@@ -954,22 +1123,44 @@
           body: JSON.stringify(state)
         });
 
-        if (!response.ok) {
-          throw new Error(`Server responded with code ${response.status}`);
+        if (response.ok) {
+          const locationHeader = response.headers.get('Location');
+          if (locationHeader) {
+            const key = locationHeader.split('/').pop();
+            localStorage.setItem("aura-sync-key", "jb-" + key);
+            showNotification("Aura Link established successfully!", "success");
+            openSyncModal();
+            return;
+          }
         }
-
-        const locationHeader = response.headers.get('Location');
-        if (!locationHeader) {
-          throw new Error("Location header was omitted by relay");
-        }
-
-        const key = locationHeader.split('/').pop();
-        localStorage.setItem("aura-sync-key", key);
-
-        showNotification("Aura Link established successfully!", "success");
-        openSyncModal();
       } catch (err) {
-        console.error("Create channel failure:", err);
+        console.warn("Primary JSONBlob relay failed, attempting backup npoint relay...", err);
+      }
+
+      // Attempt 2: Fallback to NPoint relay (returns ID directly in response body, preventing CORS Location header blocks!)
+      try {
+        state.lastUpdated = Date.now();
+        const response = await fetch('https://api.npoint.io/documents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ contents: state })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Fallback relay returned status ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data && data.id) {
+          localStorage.setItem("aura-sync-key", "np-" + data.id);
+          showNotification("Aura Link established via backup relay!", "success");
+          openSyncModal();
+          return;
+        }
+      } catch (err) {
+        console.error("All sync relays failed:", err);
         showNotification("Could not establish Aura Link (Offline or CORS).", "error");
       }
     }
@@ -1141,12 +1332,24 @@
       // Set dark/light class
       if (state.theme === 'dark') {
         root.classList.add('dark');
+        root.classList.remove('light');
       } else {
+        root.classList.add('light');
         root.classList.remove('dark');
       }
 
       // Set Palette attribute
       root.setAttribute('data-palette', state.palette);
+
+      // Handle the animated gradient background for Aurora theme
+      const body = document.body;
+      if (body) {
+        if (state.palette === 'aurora') {
+          body.classList.add('aurora-animate-bg');
+        } else {
+          body.classList.remove('aurora-animate-bg');
+        }
+      }
 
       // Style highlit rings around palette buttons
       document.querySelectorAll("[id^='palette-']").forEach(btn => {
@@ -1403,25 +1606,50 @@
       const activeBtn = document.getElementById(`preset-${minutes}`);
       if (activeBtn) activeBtn.className = "text-[10px] px-2 py-1 font-mono rounded bg-white/25 shadow-sm font-semibold cursor-pointer text-white";
 
+      // Reset play button visuals
+      const playIcon = document.getElementById("focus-play-icon");
+      const playText = document.getElementById("focus-play-text");
+      if (playText && playIcon) {
+        playText.textContent = "Start Focus";
+        playIcon.setAttribute("data-lucide", "play");
+      }
+      const fsPlayIcon = document.getElementById("fullscreen-focus-play-icon");
+      const fsPlayText = document.getElementById("fullscreen-focus-play-text");
+      if (fsPlayText && fsPlayIcon) {
+        fsPlayText.textContent = "Start Session";
+        fsPlayIcon.setAttribute("data-lucide", "play");
+      }
+
       updateFocusUI();
+      updateIcons();
     }
 
     function toggleFocusTimer() {
-      const btn = document.getElementById("focus-play-btn");
       const playIcon = document.getElementById("focus-play-icon");
       const playText = document.getElementById("focus-play-text");
+
+      const fsPlayIcon = document.getElementById("fullscreen-focus-play-icon");
+      const fsPlayText = document.getElementById("fullscreen-focus-play-text");
 
       if (focusIsRunning) {
         // Pause
         clearInterval(focusInterval);
         focusIsRunning = false;
-        playText.textContent = "Resume Focus";
-        playIcon.setAttribute("data-lucide", "play");
+        
+        if (playText) playText.textContent = "Resume Focus";
+        if (playIcon) playIcon.setAttribute("data-lucide", "play");
+
+        if (fsPlayText) fsPlayText.textContent = "Resume Session";
+        if (fsPlayIcon) fsPlayIcon.setAttribute("data-lucide", "play");
       } else {
         // Start
         focusIsRunning = true;
-        playText.textContent = "Pause Space";
-        playIcon.setAttribute("data-lucide", "pause");
+        
+        if (playText) playText.textContent = "Pause Space";
+        if (playIcon) playIcon.setAttribute("data-lucide", "pause");
+
+        if (fsPlayText) fsPlayText.textContent = "Pause Session";
+        if (fsPlayIcon) fsPlayIcon.setAttribute("data-lucide", "pause");
 
         focusInterval = setInterval(() => {
           focusSecondsLeft--;
@@ -1449,13 +1677,20 @@
     function resetFocusTimer() {
       clearInterval(focusInterval);
       focusIsRunning = false;
-      focusSecondsLeft = focusPreset * 60;
+      focusSecondsLeft = Math.round(focusPreset * 60);
       
       const playIcon = document.getElementById("focus-play-icon");
       const playText = document.getElementById("focus-play-text");
       if (playText && playIcon) {
         playText.textContent = "Start Focus";
         playIcon.setAttribute("data-lucide", "play");
+      }
+
+      const fsPlayIcon = document.getElementById("fullscreen-focus-play-icon");
+      const fsPlayText = document.getElementById("fullscreen-focus-play-text");
+      if (fsPlayText && fsPlayIcon) {
+        fsPlayText.textContent = "Start Session";
+        fsPlayIcon.setAttribute("data-lucide", "play");
       }
       
       updateFocusUI();
@@ -1467,24 +1702,159 @@
       const phaseNode = document.getElementById("focus-phase-label");
       const progressCircle = document.getElementById("focus-progress-circle");
 
+      const fsTimerTextNode = document.getElementById("fullscreen-focus-timer-text");
+      const fsPhaseNode = document.getElementById("fullscreen-focus-phase-label");
+      const fsProgressCircleSm = document.getElementById("fullscreen-focus-progress-circle-sm");
+      const fsProgressCircleLg = document.getElementById("fullscreen-focus-progress-circle-lg");
+
       if (!timerTextNode || !phaseNode || !progressCircle) return;
 
       // Format seconds to mm:ss
       const m = Math.floor(focusSecondsLeft / 60);
       const s = focusSecondsLeft % 60;
       const pad = (num) => String(num).padStart(2, '0');
-      timerTextNode.textContent = `${pad(m)}:${pad(s)}`;
+      const timeStr = `${pad(m)}:${pad(s)}`;
+      
+      timerTextNode.textContent = timeStr;
 
       phaseNode.textContent = focusPhase;
       phaseNode.className = focusPhase === "work" 
         ? "text-[9px] font-mono uppercase tracking-widest text-emerald-100"
         : "text-[9px] font-mono uppercase tracking-widest text-white font-bold";
 
+      if (fsTimerTextNode) fsTimerTextNode.textContent = timeStr;
+      if (fsPhaseNode) {
+        fsPhaseNode.textContent = focusPhase === "work" ? "Work Session" : "Break Session";
+        const phaseContainer = document.getElementById("fullscreen-focus-phase-container");
+        if (phaseContainer) {
+          phaseContainer.className = focusPhase === "work"
+            ? "text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300 mb-6 font-display flex items-center gap-2"
+            : "text-xs font-semibold uppercase tracking-[0.25em] text-sky-300 mb-6 font-display flex items-center gap-2";
+        }
+      }
+
       // Circle dynamic stroke displacement
       const perimeter = 2 * Math.PI * 54; // r=54 -> 339.29
       const ratio = focusSecondsLeft / focusTotalSeconds;
       const dashoffset = perimeter - (ratio * perimeter);
       progressCircle.setAttribute("stroke-dashoffset", dashoffset);
+
+      // Fullscreen Small progress circle: radius = 114, perimeter = ~716.28
+      if (fsProgressCircleSm) {
+        const fsSmPerimeter = 2 * Math.PI * 114;
+        const fsSmOffset = fsSmPerimeter - (ratio * fsSmPerimeter);
+        fsProgressCircleSm.setAttribute("stroke-dashoffset", fsSmOffset);
+      }
+
+      // Fullscreen Large progress circle: radius = 144, perimeter = ~904.78
+      if (fsProgressCircleLg) {
+        const fsLgPerimeter = 2 * Math.PI * 144;
+        const fsLgOffset = fsLgPerimeter - (ratio * fsLgPerimeter);
+        fsProgressCircleLg.setAttribute("stroke-dashoffset", fsLgOffset);
+      }
+    }
+
+    // Custom Timer Trigger Methods
+    function toggleCustomTimerInput() {
+      const picker = document.getElementById("custom-timer-picker");
+      if (picker) {
+        picker.classList.toggle("hidden");
+      }
+    }
+
+    function applyCustomFocusTimer() {
+      const minInput = document.getElementById("custom-focus-min");
+      const secInput = document.getElementById("custom-focus-sec");
+      if (!minInput || !secInput) return;
+
+      let m = parseInt(minInput.value) || 0;
+      let s = parseInt(secInput.value) || 0;
+
+      // Sanitization
+      if (m < 0) m = 0;
+      if (s < 0) s = 0;
+      if (s > 59) s = 59;
+      if (m === 0 && s === 0) {
+        m = 1; // Default floor
+      }
+
+      const totalSecs = (m * 60) + s;
+
+      if (focusIsRunning) {
+        const cancel = confirm("Active session in progress. Abandon focus?");
+        if (!cancel) return;
+        clearInterval(focusInterval);
+        focusIsRunning = false;
+      }
+
+      // Sync active button highlighting off
+      document.querySelectorAll("[id^='preset-']").forEach(btn => {
+        btn.className = "text-[10px] px-2 py-1 font-mono rounded cursor-pointer transition-all hover:bg-white/20";
+      });
+      const customBtn = document.getElementById("preset-customBtn");
+      if (customBtn) {
+        customBtn.className = "text-[10px] px-1.5 py-1 font-mono rounded bg-white/25 shadow-sm font-semibold cursor-pointer text-white flex items-center justify-center";
+      }
+
+      focusPreset = m + (s / 60);
+      focusSecondsLeft = totalSecs;
+      focusTotalSeconds = totalSecs;
+
+      // Close custom panel
+      const picker = document.getElementById("custom-timer-picker");
+      if (picker) picker.classList.add("hidden");
+
+      showNotification(`Custom timer configured: ${m}m ${s}s`, "success");
+      
+      // Reset visuals
+      const playIcon = document.getElementById("focus-play-icon");
+      const playText = document.getElementById("focus-play-text");
+      if (playText && playIcon) {
+        playText.textContent = "Start Focus";
+        playIcon.setAttribute("data-lucide", "play");
+      }
+      const fsPlayIcon = document.getElementById("fullscreen-focus-play-icon");
+      const fsPlayText = document.getElementById("fullscreen-focus-play-text");
+      if (fsPlayText && fsPlayIcon) {
+        fsPlayText.textContent = "Start Session";
+        fsPlayIcon.setAttribute("data-lucide", "play");
+      }
+
+      updateFocusUI();
+      updateIcons();
+    }
+
+    // Entering immersive Fullscreen Focus View
+    function enterFocusFullscreen() {
+      const overlay = document.getElementById("focus-fullscreen-overlay");
+      if (overlay) {
+        overlay.classList.remove("hidden");
+        overlay.classList.add("flex");
+        
+        // Populate random inspirational Zen focus quote
+        const quotesPool = [
+          "Focus is a high-contrast state where mind and task become a single unified flow.",
+          "Concentrate all your thoughts upon the work at hand. The sun's rays do not burn until brought to a focus.",
+          "Quietness of mind breeds absolute precision in outcome.",
+          "Rule your mind, dwell in the present moment completely.",
+          "Simplicity of space invites clarity of thought."
+        ];
+        const quoteEl = document.getElementById("fullscreen-quote-indicator");
+        if (quoteEl) {
+          const randomIndex = Math.floor(Math.random() * quotesPool.length);
+          quoteEl.textContent = `"${quotesPool[randomIndex]}"`;
+        }
+
+        updateFocusUI();
+      }
+    }
+
+    function exitFocusFullscreen() {
+      const overlay = document.getElementById("focus-fullscreen-overlay");
+      if (overlay) {
+        overlay.classList.remove("flex");
+        overlay.classList.add("hidden");
+      }
     }
 
     // Solid Browser Web Audio API Zen Synthesizer (Works 100% locally and offline!)
