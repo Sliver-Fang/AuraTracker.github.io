@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://4kwallpapers.com/images/wallpapers/sukuna-jujutsu-5120x2880-13852.png" />
+<img width="1200" height="475" alt="GHBanner" src="https://static.wikia.nocookie.net/jujutsu-kaisen/images/3/36/Sukuna_demands_Jogo%2C_Mimiko%2C_and_Nanako_bow_to_him_%28Anime%29.png/revision/latest/scale-to-width-down/1000?cb=20231102222312" />
 </div>
 
 #
