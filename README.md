@@ -1,13 +1,9 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+<img width="1200" height="475" alt="GHBanner" src="https://4kwallpapers.com/images/wallpapers/sukuna-jujutsu-5120x2880-13852.png" />
 </div>
 
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/48bfba9d-52eb-40e9-9671-47522bd5ac99
-
+#
+Prompted by human created by AI
 ## Run Locally
 
 **Prerequisites:**  Node.js
